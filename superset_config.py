@@ -87,7 +87,6 @@ class CustomSsoSecurityManager(SupersetSecurityManager):
 CUSTOM_SECURITY_MANAGER = CustomSsoSecurityManager
 
 ROW_LIMIT = 5000
-SUPERSET_WEBSERVER_PORT = 8080
 SECRET_KEY = os.environ['SECRET_KEY']
 SQLALCHEMY_DATABASE_URI = 'postgres://'+os.environ['POSTGRES_USER']+':'+os.environ['POSTGRES_PASSWORD']+'@'+os.environ['POSTGRES_URL']
 AUTH_USER_REGISTRATION = True 
