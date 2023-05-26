@@ -108,6 +108,7 @@ OAUTH_PROVIDERS = [{
 'base_url': 'https://techaid-auth.eu.auth0.com/',
 'access_token_url': 'https://techaid-auth.eu.auth0.com/oauth/token',
 'authorize_url': 'https://techaid-auth.eu.auth0.com/authorize',
-'access_token_method':'POST'
+'access_token_method':'POST',
+'server_metadata_url':'https://techaid-auth.eu.auth0.com/.well-known/openid-configuration'
 }
 }]
