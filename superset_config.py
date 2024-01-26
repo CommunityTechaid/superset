@@ -10,6 +10,20 @@ AUTH_ROLES_MAPPING = {
 }    
 logger = logging.getLogger('auth0_login')
 
+# See https://superset.apache.org/docs/security/
+# FAB: Flask AppBuilder
+#
+# Admin
+# Admins have all possible rights, including granting or revoking rights from other users and altering other people’s slices and dashboards.
+#
+# Alpha
+# Alpha users have access to all data sources, but they cannot grant or revoke access from other users. They are also limited to altering the objects that they own. Alpha users can add and alter data sources.
+#
+# Gamma
+# Gamma users have limited access. They can only consume data coming from data sources they have been given access to through another complementary role. They only have access to view the slices and dashboards made from data sources that they have access to. Currently Gamma users are not able to alter or add data sources. We assume that they are mostly content consumers, though they can create slices and dashboards.
+#
+# Also note that when Gamma users look at the dashboards and slices list view, they will only see the objects that they have access to.
+
 class CustomSsoSecurityManager(SupersetSecurityManager):
     def __init__(self, appbuilder):
       super(SupersetSecurityManager, self).__init__(appbuilder)
@@ -49,10 +63,10 @@ class CustomSsoSecurityManager(SupersetSecurityManager):
             logger.debug(" user_data: %s", me)
             prefix = 'Superset'
             return {
-                'username' : 'super.user@communitytechaid.org.uk',
-                'name' : me.get('nickname') or me.get('name'),
-                'email' : 'info@communitytechaid.org.uk',
-                'given_name': 'Community TechAid',
+                'username' : me.get('email'),
+                'name' : me.get('name') or me.get('nickname'),
+                'email' : me.get('email'),
+                'given_name': me.get('name') or me.get('nickname'),
                 'first_name': 'Community',
                 'last_name': 'TechAid',
                 'avatar_url': me.get('picture'),
@@ -112,3 +126,33 @@ OAUTH_PROVIDERS = [{
 'server_metadata_url':'https://techaid-auth.eu.auth0.com/.well-known/openid-configuration'
 }
 }]
+
+TALISMAN_CONFIG = {
+    "content_security_policy": {
+        "base-uri": ["'self'"],
+        "default-src": ["'self'"],
+        "img-src": [
+            "'self'",
+            "blob:",
+            "data:",
+            "https://apachesuperset.gateway.scarf.sh",
+            "https://static.scarf.sh/",
+            "https://www.gravatar.com/"
+        ],
+        "worker-src": ["'self'", "blob:"],
+        "connect-src": [
+            "'self'",
+            "https://api.mapbox.com",
+            "https://events.mapbox.com",
+        ],
+        "object-src": "'none'",
+        "style-src": [
+            "'self'",
+            "'unsafe-inline'",
+        ],
+        "script-src": ["'self'", "'strict-dynamic'"],
+    },
+    "content_security_policy_nonce_in": ["script-src"],
+    "force_https": False,
+    "session_cookie_secure": False,
+}

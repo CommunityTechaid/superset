@@ -1,4 +1,4 @@
-FROM apache/superset
+FROM apache/superset:3.0.0
 # Switching to root to install the required packages
 USER root
 # Find which driver you need based on the analytics database
