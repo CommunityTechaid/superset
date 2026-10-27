@@ -1,0 +1,39 @@
+---
+name: 'promote to production'
+
+# Points superset-production at the image superset-testing runs, so production only ever gets an
+# image that was tried on testing first. Run it manually from main once testing looks right.
+# yamllint disable-line rule:truthy
+on:
+  workflow_dispatch:
+
+jobs:
+  promote:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Azure login
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Point superset-production at the testing image
+        run: |
+          IMAGE=$(az containerapp show --name superset-testing --resource-group tada-2026 \
+            --query "properties.template.containers[0].image" -o tsv)
+          case "$IMAGE" in
+            *:latest|"")
+              echo "::error::superset-testing runs '$IMAGE', not a commit-tagged image. Deploy to testing first."
+              exit 1
+              ;;
+          esac
+          echo "Promoting $IMAGE"
+          az containerapp update \
+            --name superset-production \
+            --resource-group tada-2026 \
+            --image "$IMAGE"

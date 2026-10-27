@@ -31,9 +31,10 @@ jobs:
         uses: docker/metadata-action@v6
         with:
           images: ghcr.io/communitytechaid/superset
+          # Commit tag only. :latest is no longer pushed: superset-production still runs it, so
+          # it must stop moving. Production changes only through promote.yml.
           tags: |
             type=sha,prefix=,format=short
-            type=raw,value=latest
 
       - name: Build and push
         uses: docker/build-push-action@v7
@@ -60,5 +61,5 @@ jobs:
         run: |
           az containerapp update \
             --name superset-testing \
-            --resource-group dashboards \
-            --image ghcr.io/communitytechaid/superset:latest
+            --resource-group tada-2026 \
+            --image ghcr.io/communitytechaid/superset:${GITHUB_SHA::7}
